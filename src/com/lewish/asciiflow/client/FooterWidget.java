@@ -27,7 +27,8 @@ public class FooterWidget extends Composite {
 		} else {
 			footer.add(new Anchor("Stable build", UriConstants.STABLE_HOST));
 		}
-
+		footer.add(new HTML("&nbsp;-&nbsp;"));
+		footer.add(new Anchor("Github", UriConstants.GITHUB_URI));
 		initWidget(footer);
 	}
 }

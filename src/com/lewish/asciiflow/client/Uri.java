@@ -141,7 +141,7 @@ public class Uri {
 		activity = null;
 		id = 0;
 		editCode = 0;
-		RegExp regex = RegExp.compile("([a-zA-Z]+)(\\d*)/*(\\d*)");
+		RegExp regex = RegExp.compile("([a-zA-Z]*)(\\d*)/(\\d*)");
 		MatchResult matcher = regex.exec(History.getToken());
 		if (matcher == null) {
 			return;

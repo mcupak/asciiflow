@@ -7,4 +7,5 @@ public class UriConstants {
 
 	public static final String BLOG_URI = "http://blog.asciiflow.com";
 	public static final String MAILTO_URI = "mailto:lewis@asciiflow.com";
+	public static final String GITHUB_URI = "//github.com/lewish/asciiflow";
 }

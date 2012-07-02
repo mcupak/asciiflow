@@ -88,8 +88,7 @@ public class StoreServiceImpl extends RemoteServiceServlet implements StoreServi
 	@Override
 	public BatchStoreQueryResult loadTenStates(String cursorString) {
 		PersistenceManager pm = Persistence.getManager();
-		// TODO: Should only return States marked as public.
-		Query query = pm.newQuery(State.class);
+		Query query = pm.newQuery(State.class, "isPublic == 'true'");
 		query.setRange(0, 10);
 		if (cursorString != null) {
 			Cursor cursor = Cursor.fromWebSafeString(cursorString);
