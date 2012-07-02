@@ -141,7 +141,7 @@ public class Uri {
 		activity = null;
 		id = 0;
 		editCode = 0;
-		RegExp regex = RegExp.compile("([a-zA-Z]*)(\\d*)/(\\d*)");
+		RegExp regex = RegExp.compile("([a-zA-Z]*)(\\d*)/*(\\d*)");
 		MatchResult matcher = regex.exec(History.getToken());
 		if (matcher == null) {
 			return;
@@ -150,11 +150,15 @@ public class Uri {
 		if (groups >= 2) {
 			activity = matcher.getGroup(1);
 		}
-		if (groups >= 3) {
-			id = Long.parseLong(matcher.getGroup(2));
-		}
-		if (groups >= 4) {
-			editCode = Integer.parseInt(matcher.getGroup(3));
+		try {
+			if (groups >= 3) {
+				id = Long.parseLong(matcher.getGroup(2));
+			}
+			if (groups >= 4) {
+
+				editCode = Integer.parseInt(matcher.getGroup(3));
+			}
+		} catch (NumberFormatException e) {
 		}
 	}
 

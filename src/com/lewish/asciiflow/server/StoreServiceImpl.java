@@ -88,13 +88,13 @@ public class StoreServiceImpl extends RemoteServiceServlet implements StoreServi
 	@Override
 	public BatchStoreQueryResult loadTenStates(String cursorString) {
 		PersistenceManager pm = Persistence.getManager();
-		Query query = pm.newQuery(State.class, "isPublic == 'true'");
+		Query query = pm.newQuery(State.class, "isPublic == true");
 		query.setRange(0, 10);
 		if (cursorString != null) {
 			Cursor cursor = Cursor.fromWebSafeString(cursorString);
-	        Map<String, Object> extensionMap = new HashMap<String, Object>();
-	        extensionMap.put(JDOCursorHelper.CURSOR_EXTENSION, cursor);
-	        query.setExtensions(extensionMap);
+			Map<String, Object> extensionMap = new HashMap<String, Object>();
+			extensionMap.put(JDOCursorHelper.CURSOR_EXTENSION, cursor);
+			query.setExtensions(extensionMap);
 		}
 
 		String newCursorString;

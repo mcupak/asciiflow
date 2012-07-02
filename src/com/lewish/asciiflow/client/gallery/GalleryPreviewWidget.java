@@ -14,6 +14,11 @@ import com.lewish.asciiflow.client.resources.AsciiflowCss;
 import com.lewish.asciiflow.shared.OutputUtils;
 import com.lewish.asciiflow.shared.State;
 
+/**
+ * Previews a single asciiflow drawing in readonly text.
+ * 
+ * @author lewis
+ */
 public class GalleryPreviewWidget extends Composite {
 
 	private final ActivityController activityController;

@@ -242,5 +242,16 @@ div.loadingBackground {
 }
 
 .galleryPreviewWidget {
-	margin-bottom: 20px;
+	margin-bottom: 40px;
+}
+
+.galleryPreviewWidget a, .getMoreLink {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	text-align: center;
+}
+
+.getMoreLink {
+	color: #F00;
 }
