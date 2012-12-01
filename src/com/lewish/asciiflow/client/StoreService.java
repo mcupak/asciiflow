@@ -11,4 +11,5 @@ public interface StoreService extends RemoteService {
 	public State saveState(State state) throws AccessException;
 	public State loadState(Long id, Integer editCode);
 	public BatchStoreQueryResult loadTenStates(String cursorString);
+	int tryService(int i);
 }

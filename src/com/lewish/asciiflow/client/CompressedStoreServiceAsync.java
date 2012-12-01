@@ -1,5 +1,6 @@
 package com.lewish.asciiflow.client;
 
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -30,6 +31,7 @@ public class CompressedStoreServiceAsync {
 		service.loadState(id, editCode, new AsyncCallback<State>() {
 			@Override
 			public void onSuccess(final State result) {
+				Window.alert("Successful Load");
 				compressor.uncompress(result, new Callback() {
 					@Override
 					public void onFinish(boolean success) {
@@ -40,6 +42,7 @@ public class CompressedStoreServiceAsync {
 
 			@Override
 			public void onFailure(Throwable caught) {
+				Window.alert("Failed Load");
 				callback.afterLoad(false, null);
 			}
 		});
@@ -71,13 +74,26 @@ public class CompressedStoreServiceAsync {
 				if (!result) {
 					callback.afterSave(false, null);
 				} else {
+					service.tryService(199, new AsyncCallback<Integer>() {
+						@Override
+						public void onFailure(Throwable caught) {
+							Window.alert("Failed try");
+						}
+
+						@Override
+						public void onSuccess(Integer result) {
+							Window.alert("The number is "+result);
+						}
+					});
 					service.saveState(state, new AsyncCallback<State>() {
 						@Override
 						public void onSuccess(State result) {
+							Window.alert("Successful Save");
 							callback.afterSave(true, result);
 						}
 						@Override
 						public void onFailure(Throwable caught) {
+							Window.alert("Failed Save: "+state.toString());
 							callback.afterSave(false, null);
 						}
 					});

@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.lewish.asciiflow.client.StoreModel.ModelChangeEvent;
@@ -41,6 +42,7 @@ public class StoreWidget extends Composite implements ModelChangeHandler {
 	private final Anchor editLink = new Anchor();
 	private final Anchor readonlyLink = new Anchor();
 	private final Button saveButton = new Button();
+	private final Button loadButton =  new Button();
 	private final TextBox titleBox = new TextBox();
 	private final CheckBox isPublic = new CheckBox();
 
@@ -59,6 +61,13 @@ public class StoreWidget extends Composite implements ModelChangeHandler {
 				storeHelper.save();
 			}
 		});
+		
+		loadButton.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				loadFromUri();
+			}
+		});
 
 		titleBox.addValueChangeHandler(new ValueChangeHandler<String>() {
 			@Override
@@ -75,6 +84,7 @@ public class StoreWidget extends Composite implements ModelChangeHandler {
 		});
 
 		saveButton.setText("Save");
+		loadButton.setText("Load");
 		readonlyLink.setText("Read only Link");
 		editLink.setText("Edit link");
 		titleBox.setText("Untitled");
@@ -85,6 +95,7 @@ public class StoreWidget extends Composite implements ModelChangeHandler {
 		FlowPanel panel = new FlowPanel();
 		panel.setStyleName(css.block());
 		panel.add(saveButton);
+		panel.add(loadButton);
 		panel.add(new InlineLabel(" Title: "));
 		panel.add(titleBox);
 		panel.add(new InlineLabel(" Public: "));
