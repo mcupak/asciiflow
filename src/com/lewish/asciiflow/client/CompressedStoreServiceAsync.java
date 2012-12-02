@@ -74,14 +74,13 @@ public class CompressedStoreServiceAsync {
 				if (!result) {
 					callback.afterSave(false, null);
 				} else {
-					service.tryService(199, new AsyncCallback<Integer>() {
+					service.tryService(state, new AsyncCallback<Long>() {
 						@Override
 						public void onFailure(Throwable caught) {
 							Window.alert("Failed try");
 						}
-
 						@Override
-						public void onSuccess(Integer result) {
+						public void onSuccess(Long result) {
 							Window.alert("The number is "+result);
 						}
 					});

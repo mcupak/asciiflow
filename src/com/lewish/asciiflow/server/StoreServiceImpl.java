@@ -33,7 +33,6 @@ public class StoreServiceImpl extends RemoteServiceServlet implements StoreServi
 	@Override
 	public State saveState(State state) throws AccessException {
 
-		return state; /*
 		if(!state.hasId()) {
 			//TODO Check collisions or do some math.
 			state.setId(generateId());
@@ -44,6 +43,7 @@ public class StoreServiceImpl extends RemoteServiceServlet implements StoreServi
 				throw new AccessException(state);
 			}
 		}
+		
 		PersistenceManager pm = Persistence.getManager();
 		if (state.isCompressed()) {
 			try {
@@ -54,7 +54,7 @@ public class StoreServiceImpl extends RemoteServiceServlet implements StoreServi
 			}
 		} else {
 			return null;
-		}*/
+		}
 	}
 
 	private Long generateId() {
@@ -126,8 +126,17 @@ public class StoreServiceImpl extends RemoteServiceServlet implements StoreServi
 	}
 
 	@Override
-	public int tryService(int i) {
-		// TODO Auto-generated method stub
-		return i+1;
+	public long tryService(State state) throws AccessException {
+		if(!state.hasId()) {
+			//TODO Check collisions or do some math.
+			state.setId(generateId());
+			state.setEditCode(generateEditCode());
+		} else {
+			State loadState = fetchState(state.getId());
+			if(!loadState.getEditCode().equals(state.getEditCode())) {
+				throw new AccessException(state);
+			}
+		}
+		return state.getId();
 	}
 }

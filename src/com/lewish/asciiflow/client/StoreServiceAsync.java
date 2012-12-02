@@ -8,5 +8,5 @@ public interface StoreServiceAsync {
 	public void saveState(State state, AsyncCallback<State> callback);
 	public void loadState(Long id, Integer editCode, AsyncCallback<State> callback);
 	public void loadTenStates(String cursorString, AsyncCallback<BatchStoreQueryResult> callback);
-	public void tryService(int i, AsyncCallback<Integer> callback);
+	void tryService(State state, AsyncCallback<Long> callback);
 }
