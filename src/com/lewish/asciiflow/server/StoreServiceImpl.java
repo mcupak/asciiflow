@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
+import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.Query;
 
 import org.datanucleus.store.appengine.query.JDOCursorHelper;
@@ -29,6 +31,8 @@ public class StoreServiceImpl extends RemoteServiceServlet implements StoreServi
 	private static final long serialVersionUID = -3286308257185371845L;
 
 	private Random random = new Random();
+	private final static PersistenceManagerFactory managerFactory = JDOHelper
+	.getPersistenceManagerFactory("transactions-optional");
 
 	@Override
 	public State saveState(State state) throws AccessException {
@@ -43,8 +47,7 @@ public class StoreServiceImpl extends RemoteServiceServlet implements StoreServi
 				throw new AccessException(state);
 			}
 		}
-		
-		PersistenceManager pm = Persistence.getManager();
+		PersistenceManager pm = managerFactory.getPersistenceManager();
 		if (state.isCompressed()) {
 			try {
 				state = pm.makePersistent(state);
@@ -88,7 +91,7 @@ public class StoreServiceImpl extends RemoteServiceServlet implements StoreServi
 	 */
 	@Override
 	public BatchStoreQueryResult loadTenStates(String cursorString) {
-		PersistenceManager pm = Persistence.getManager();
+		PersistenceManager pm = managerFactory.getPersistenceManager();
 		Query query = pm.newQuery(State.class, "isPublic == true");
 		query.setRange(0, 10);
 		if (cursorString != null) {
@@ -113,7 +116,7 @@ public class StoreServiceImpl extends RemoteServiceServlet implements StoreServi
 	}
 
 	private State fetchState(Long id) {
-		PersistenceManager pm = Persistence.getManager();
+		PersistenceManager pm = managerFactory.getPersistenceManager();
 		State state;
 		try {
 			state = pm.getObjectById(State.class, id);
