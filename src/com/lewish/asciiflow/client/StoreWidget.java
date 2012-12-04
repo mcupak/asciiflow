@@ -143,11 +143,11 @@ public class StoreWidget extends Composite implements ModelChangeHandler {
 		}
 		Long id = uri.getId();
 		Integer editCode = uri.getEditCode();
-		if (id.equals(storeModel.getCurrentState().getId())
-				&& editCode.equals(storeModel.getCurrentState().getEditCode())) {
-			// If neither field has changed, do nothing.
-			return;
-		}
+		// reload at every cost, even if nothing changed in the matter of collaboration
+		// if (id.equals(storeModel.getCurrentState().getId())
+		// && editCode.equals(storeModel.getCurrentState().getEditCode())) {
+		// return;
+		// }
 		storeModel.load(id, editCode);
 	}
 
