@@ -31,7 +31,7 @@ public class CompressedStoreServiceAsync {
 		service.loadState(id, editCode, new AsyncCallback<State>() {
 			@Override
 			public void onSuccess(final State result) {
-				Window.alert("Successful Load");
+//				Window.alert("Successful Load");
 				compressor.uncompress(result, new Callback() {
 					@Override
 					public void onFinish(boolean success) {
@@ -81,13 +81,13 @@ public class CompressedStoreServiceAsync {
 						}
 						@Override
 						public void onSuccess(Long result) {
-							Window.alert("The number is "+result);
+//							Window.alert("The number is "+result);
 						}
 					});
 					service.saveState(state, new AsyncCallback<State>() {
 						@Override
 						public void onSuccess(State result) {
-							Window.alert("Successful Save");
+//							Window.alert("Successful Save");
 							callback.afterSave(true, result);
 						}
 						@Override
