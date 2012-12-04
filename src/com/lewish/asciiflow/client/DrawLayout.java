@@ -25,6 +25,7 @@ public class DrawLayout extends SidebarLayout {
 		this.toolPanel = toolPanel;
 		this.infoPanel = infoPanel;
 		this.storeWidget = storeWidget;
+		this.canvas.setStoreModel(storeWidget.getStoreModel());
 		this.menuPanel = menuPanel;
 		this.exportWidget = exportWidget;
 		this.importWidget = importWidget;

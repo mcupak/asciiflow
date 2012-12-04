@@ -16,9 +16,9 @@ import com.lewish.asciiflow.shared.CellStateMap;
 import com.lewish.asciiflow.shared.CellState;
 
 /**
- * Provides core implementation of the cell/text based canvas.
- * Note: this should not be changed at all costs, the implementation and
- * notion of commit/refresh is rather complicated.
+ * Provides core implementation of the cell/text based canvas. Note: this should
+ * not be changed at all costs, the implementation and notion of commit/refresh
+ * is rather complicated.
  * 
  * @author lewis
  */
@@ -43,6 +43,8 @@ public class Canvas extends Composite {
 
 	private Set<CellImpl> currentDraw = new HashSet<CellImpl>();
 	private Set<CellImpl> nextDraw = new HashSet<CellImpl>();
+
+	private StoreModel storeModel;
 
 	@Inject
 	public Canvas(LoadingWidget loadingWidget, AsciiflowCss css) {
@@ -85,6 +87,14 @@ public class Canvas extends Composite {
 		refreshDraw(false);
 	}
 
+	public StoreModel getStoreModel() {
+		return storeModel;
+	}
+
+	public void setStoreModel(StoreModel storeModel) {
+		this.storeModel = storeModel;
+	}
+
 	public void refreshDraw(boolean sticky) {
 		currentDraw.addAll(nextDraw);
 		nextDraw.clear();
@@ -93,7 +103,8 @@ public class Canvas extends Composite {
 				// Using as a temporary store, for cells to remove from draw.
 				nextDraw.add(cell);
 			}
-			String value = cell.drawValue != null ? cell.drawValue : cell.commitValue;
+			String value = cell.drawValue != null ? cell.drawValue
+					: cell.commitValue;
 			if (cell.value == null || !cell.value.equals(value)) {
 				pushValue(cell, value);
 			}
@@ -149,8 +160,8 @@ public class Canvas extends Composite {
 		CellStateMap oldState = new CellStateMap();
 		for (CellImpl cell : currentDraw) {
 			if (cell.value != null) {
-				oldState.add(new CellState(cell.x, cell.y, cell.commitValue == null ? " "
-						: cell.commitValue));
+				oldState.add(new CellState(cell.x, cell.y,
+						cell.commitValue == null ? " " : cell.commitValue));
 				if (cell.value.equals(" ")) {
 					cell.commitValue = null;
 				} else {
@@ -166,7 +177,7 @@ public class Canvas extends Composite {
 		currentDraw.clear();
 		return oldState;
 	}
-
+	
 	private void pushHighlight(CellImpl cell) {
 		cell.highlight = cell.drawHighlight;
 		if (cell.highlight) {

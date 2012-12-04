@@ -179,4 +179,8 @@ public class StoreWidget extends Composite implements ModelChangeHandler {
 		}
 		updateLinks();
 	}
+
+	public StoreModel getStoreModel() {
+		return storeModel;
+	}
 }

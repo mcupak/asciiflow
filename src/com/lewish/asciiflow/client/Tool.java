@@ -26,6 +26,7 @@ public abstract class Tool {
 	 */
 	protected void commitDraw() {
 		historyManager.save(canvas.commitDraw());
+		canvas.getStoreModel().save();
 	}
 
 	protected void refreshDraw() {
