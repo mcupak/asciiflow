@@ -1,11 +1,10 @@
 package com.lewish.asciiflow.client;
 
-import com.gargoylesoftware.htmlunit.javascript.host.Window;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.lewish.asciiflow.client.CompressedStoreServiceAsync.LoadCallback;
@@ -13,13 +12,17 @@ import com.lewish.asciiflow.client.CompressedStoreServiceAsync.SaveCallback;
 import com.lewish.asciiflow.shared.State;
 
 /**
- * The model holding the current state of a diagram save or load operation.
- * The actual model data is infact stored in the {@link Canvas}. This should probably change.
+ * The model holding the current state of a diagram save or load operation. The
+ * actual model data is infact stored in the {@link Canvas}. This should
+ * probably change.
  * 
  * @author lewis
  */
 @Singleton
 public class StoreModel {
+
+	private static final int LOADING_INTERVAL = 3000;
+	Timer loadTimer;
 
 	public static interface ModelChangeHandler extends EventHandler {
 		public void onModelChange(ModelChangeEvent event);
@@ -28,17 +31,17 @@ public class StoreModel {
 	public static class ModelChangeEvent extends GwtEvent<ModelChangeHandler> {
 
 		public static enum ModelChangeState {
-			LOADED,
-			SAVED,
-			CLEARED,
-			;
+			LOADED, SAVED, CLEARED, ;
 		}
 
 		public static final Type<ModelChangeHandler> TYPE = new Type<ModelChangeHandler>();
-		public static final ModelChangeEvent LOADED = new ModelChangeEvent(ModelChangeState.LOADED);
-		public static final ModelChangeEvent SAVED = new ModelChangeEvent(ModelChangeState.SAVED);
-		public static final ModelChangeEvent CLEARED = new ModelChangeEvent(ModelChangeState.CLEARED);
-	
+		public static final ModelChangeEvent LOADED = new ModelChangeEvent(
+				ModelChangeState.LOADED);
+		public static final ModelChangeEvent SAVED = new ModelChangeEvent(
+				ModelChangeState.SAVED);
+		public static final ModelChangeEvent CLEARED = new ModelChangeEvent(
+				ModelChangeState.CLEARED);
+
 		private final ModelChangeState state;
 
 		public ModelChangeEvent(ModelChangeState state) {
@@ -67,6 +70,15 @@ public class StoreModel {
 	private final LoadingWidget loadingWidget;
 
 	private State currentState;
+	private Uri uri = null;
+
+	public Uri getUri() {
+		return uri;
+	}
+
+	public void setUri(Uri uri) {
+		this.uri = uri;
+	}
 
 	@Inject
 	public StoreModel(CompressedStoreServiceAsync service, Canvas canvas,
@@ -76,6 +88,16 @@ public class StoreModel {
 		this.loadingWidget = loadingWidget;
 
 		currentState = new State();
+
+		// start periodic loading
+		loadTimer = new Timer() {
+
+			@Override
+			public void run() {
+				loadFromUri();
+			}
+		};
+		loadTimer.scheduleRepeating(LOADING_INTERVAL);
 	}
 
 	public void load(final Long id, final Integer editCode) {
@@ -88,6 +110,21 @@ public class StoreModel {
 				fireEvent(ModelChangeEvent.LOADED);
 			}
 		});
+	}
+
+	public void loadFromUri() {
+		if (!uri.hasId()) {
+			return;
+		}
+		Long id = uri.getId();
+		Integer editCode = uri.getEditCode();
+		// reload at every cost, even if nothing changed in the matter of
+		// collaboration
+		// if (id.equals(storeModel.getCurrentState().getId())
+		// && editCode.equals(storeModel.getCurrentState().getEditCode())) {
+		// return;
+		// }
+		load(id, editCode);
 	}
 
 	public void save() {

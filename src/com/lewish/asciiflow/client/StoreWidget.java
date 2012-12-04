@@ -35,7 +35,6 @@ public class StoreWidget extends Composite implements ModelChangeHandler {
 
 	private final StoreModel storeModel;
 	private final Canvas canvas;
-	private final Uri uri;
 
 	private final FlowPanel linksPanel = new FlowPanel();
 	private final Anchor editLink = new Anchor();
@@ -47,9 +46,9 @@ public class StoreWidget extends Composite implements ModelChangeHandler {
 
 	@Inject
 	public StoreWidget(final Canvas canvas, final StoreModel storeHelper, AsciiflowCss css, Uri uri) {
+		storeHelper.setUri(uri);
 		this.storeModel = storeHelper;
 		this.canvas = canvas;
-		this.uri = uri;
 		storeModel.addModelChangeHandler(this);
 
 		saveButton.setStyleName(css.inline());
@@ -57,14 +56,15 @@ public class StoreWidget extends Composite implements ModelChangeHandler {
 		saveButton.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				storeHelper.save();
+				SaveManager.saveCanvas(canvas);
+//				storeHelper.save();
 			}
 		});
 		
 		loadButton.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				loadFromUri();
+				storeModel.loadFromUri();
 			}
 		});
 
@@ -108,12 +108,12 @@ public class StoreWidget extends Composite implements ModelChangeHandler {
 		updateLinks();
 		initWidget(panel);
 
-		loadFromUri();
+		storeModel.loadFromUri();
 
 		uri.addUriChangeHandler(new UriChangeHandler() {
 			@Override
 			public void onModelChange(UriChangeEvent event) {
-				loadFromUri();
+				storeModel.loadFromUri();
 			}
 		});
 	}
@@ -122,9 +122,9 @@ public class StoreWidget extends Composite implements ModelChangeHandler {
 		if (!storeModel.getCurrentState().hasId()) {
 			linksPanel.setVisible(false);
 		} else {
-			String editHref = uri.getDocumentLink(storeModel.getCurrentState().getId(), storeModel
+			String editHref = storeModel.getUri().getDocumentLink(storeModel.getCurrentState().getId(), storeModel
 					.getCurrentState().getEditCode());
-			String readonlyHref = uri.getDocumentLink(storeModel.getCurrentState().getId(), null);
+			String readonlyHref = storeModel.getUri().getDocumentLink(storeModel.getCurrentState().getId(), null);
 			readonlyLink.setHref(readonlyHref);
 			editLink.setHref(editHref);
 			linksPanel.setVisible(true);
@@ -134,21 +134,6 @@ public class StoreWidget extends Composite implements ModelChangeHandler {
 		saveButton.setEnabled(storeModel.getCurrentState().isEditable());
 		titleBox.setEnabled(storeModel.getCurrentState().isEditable());
 		isPublic.setEnabled(storeModel.getCurrentState().isEditable());
-	}
-
-	// TODO: Move into StoreModel probably.
-	public void loadFromUri() {
-		if (!uri.hasId()) {
-			return;
-		}
-		Long id = uri.getId();
-		Integer editCode = uri.getEditCode();
-		// reload at every cost, even if nothing changed in the matter of collaboration
-		// if (id.equals(storeModel.getCurrentState().getId())
-		// && editCode.equals(storeModel.getCurrentState().getEditCode())) {
-		// return;
-		// }
-		storeModel.load(id, editCode);
 	}
 
 	public void setTitle(String title) {
@@ -171,7 +156,7 @@ public class StoreWidget extends Composite implements ModelChangeHandler {
 			setPublic(state.isPublic());
 		}
 		if (event.getState() == ModelChangeState.SAVED) {
-			uri.setIdAndEditCode(state.getId(), state.getEditCode());
+			storeModel.getUri().setIdAndEditCode(state.getId(), state.getEditCode());
 		}
 		if (event.getState() == ModelChangeState.CLEARED) {
 			setTitle("Untitled");
