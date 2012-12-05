@@ -45,7 +45,7 @@ public class StoreWidget extends Composite implements ModelChangeHandler {
 	private final CheckBox isPublic = new CheckBox();
 
 	@Inject
-	public StoreWidget(final Canvas canvas, final StoreModel storeHelper, AsciiflowCss css, Uri uri) {
+	public StoreWidget(final Canvas canvas, final StoreModel storeHelper, final HistoryManager historyManager, AsciiflowCss css, Uri uri) {
 		storeHelper.setUri(uri);
 		this.storeModel = storeHelper;
 		this.canvas = canvas;
@@ -56,6 +56,7 @@ public class StoreWidget extends Composite implements ModelChangeHandler {
 		saveButton.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
+				SaveManager.checkSave(canvas, historyManager);
 				SaveManager.saveCanvas(canvas);
 //				storeHelper.save();
 			}

@@ -67,6 +67,26 @@ public class CompressedStoreServiceAsync {
 		});
 	}
 
+	public void checkState(final State state, final CheckCallback callback) {
+		service.checkState(state, new AsyncCallback<Integer>() {
+			@Override
+			public void onFailure(Throwable caught) {
+				Window.alert("Failed check");
+			}
+			@Override
+			public void onSuccess(Integer result) {
+				Window.alert("The number is "+result);
+				if (result.equals(0)) {
+					callback.afterCheck(true, state);
+				}
+				else if (result.equals(-1)){
+					callback.afterCheck(false, state);
+				}
+			}
+		});
+		
+	}
+	
 	public void saveState(final State state, final SaveCallback callback) {
 		compressor.compress(state, new Compressor.Callback() {
 			@Override
@@ -74,16 +94,6 @@ public class CompressedStoreServiceAsync {
 				if (!result) {
 					callback.afterSave(false, null);
 				} else {
-					service.tryService(state, new AsyncCallback<Long>() {
-						@Override
-						public void onFailure(Throwable caught) {
-							Window.alert("Failed try");
-						}
-						@Override
-						public void onSuccess(Long result) {
-//							Window.alert("The number is "+result);
-						}
-					});
 					service.saveState(state, new AsyncCallback<State>() {
 						@Override
 						public void onSuccess(State result) {
@@ -101,6 +111,10 @@ public class CompressedStoreServiceAsync {
 		});
 	}
 
+	public static interface CheckCallback {
+		public void afterCheck(boolean success, State state);
+	}
+	
 	public static interface SaveCallback {
 		public void afterSave(boolean success, State state);
 	}

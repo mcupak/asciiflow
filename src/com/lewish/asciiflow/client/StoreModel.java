@@ -4,9 +4,11 @@ import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.lewish.asciiflow.client.CompressedStoreServiceAsync.CheckCallback;
 import com.lewish.asciiflow.client.CompressedStoreServiceAsync.LoadCallback;
 import com.lewish.asciiflow.client.CompressedStoreServiceAsync.SaveCallback;
 import com.lewish.asciiflow.shared.State;
@@ -88,8 +90,10 @@ public class StoreModel {
 		this.loadingWidget = loadingWidget;
 
 		currentState = new State();
+		currentState.setOwner(Random.nextInt());
 
 		// start periodic loading
+		/*
 		loadTimer = new Timer() {
 
 			@Override
@@ -98,6 +102,7 @@ public class StoreModel {
 			}
 		};
 		loadTimer.scheduleRepeating(LOADING_INTERVAL);
+		*/
 	}
 
 	public void load(final Long id, final Integer editCode) {
@@ -125,6 +130,22 @@ public class StoreModel {
 		// return;
 		// }
 		load(id, editCode);
+	}
+	
+	public void check(final HistoryManager historyManager) {
+		loadingWidget.show();
+		currentState.setCellStateMap(canvas.getCellStates());
+		service.checkState(currentState, new CheckCallback() {
+			@Override
+			public void afterCheck(boolean success, State state) {
+				if (!success){
+					//need to pass history manager in here
+					historyManager.undo();//undo (for undo operation, redo)
+					load(uri.getId(), uri.getEditCode());
+					historyManager.redo();//redo (for undo operation, undo)
+				}
+			}
+		});
 	}
 
 	public void save() {

@@ -36,6 +36,7 @@ public class MenuPanel extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				canvas.addRow();
+				SaveManager.checkSave(canvas, historyManager);
 				SaveManager.saveCanvas(canvas);
 			}
 		}));
@@ -43,6 +44,7 @@ public class MenuPanel extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				canvas.addColumn();
+				SaveManager.checkSave(canvas, historyManager);
 				SaveManager.saveCanvas(canvas);
 			}
 		}));
@@ -50,6 +52,7 @@ public class MenuPanel extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				historyManager.undo();
+				SaveManager.checkSave(canvas, historyManager);
 				SaveManager.saveCanvas(canvas);
 			}
 		}));
@@ -58,6 +61,7 @@ public class MenuPanel extends Composite {
 			public void onClick(ClickEvent event) {
 				historyManager.redo();
 				canvas.getStoreModel().save();
+				SaveManager.checkSave(canvas, historyManager);
 				SaveManager.saveCanvas(canvas);
 			}
 		}));

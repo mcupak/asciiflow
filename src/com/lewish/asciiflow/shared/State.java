@@ -37,6 +37,9 @@ public class State implements Serializable {
 
 	@Persistent
 	private Boolean isPublic = false;
+	
+	@Persistent
+	private Integer owner = 0;
 
 	public Long getId() {
 		return id;
@@ -96,5 +99,13 @@ public class State implements Serializable {
 
 	public byte[] getCompressedState() {
 		return compressedBlob.getBytes();
+	}
+
+	public void setOwner(int owner) {
+		this.owner = owner;
+	}
+
+	public Integer getOwner() {
+		return owner;
 	}
 }

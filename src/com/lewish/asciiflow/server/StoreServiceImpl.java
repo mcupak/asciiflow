@@ -129,7 +129,8 @@ public class StoreServiceImpl extends RemoteServiceServlet implements StoreServi
 	}
 
 	@Override
-	public long tryService(State state) throws AccessException {
+	public Integer checkState(State state) throws AccessException {
+		Integer a = 0;
 		if(!state.hasId()) {
 			//TODO Check collisions or do some math.
 			state.setId(generateId());
@@ -139,7 +140,14 @@ public class StoreServiceImpl extends RemoteServiceServlet implements StoreServi
 			if(!loadState.getEditCode().equals(state.getEditCode())) {
 				throw new AccessException(state);
 			}
+			if (state.getOwner().equals(loadState.getOwner())) {
+				return a;
+			}
+			else {
+				Integer b = 1;
+				return b;
+			}
 		}
-		return state.getId();
+		return a;
 	}
 }
