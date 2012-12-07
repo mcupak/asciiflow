@@ -79,7 +79,7 @@ public class CompressedStoreServiceAsync {
 				if (result.equals(0)) {
 					callback.afterCheck(true, state);
 				}
-				else if (result.equals(-1)){
+				else {
 					callback.afterCheck(false, state);
 				}
 			}

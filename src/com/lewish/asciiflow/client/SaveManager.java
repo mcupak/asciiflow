@@ -8,11 +8,11 @@ package com.lewish.asciiflow.client;
  * 
  */
 public class SaveManager {
-
+/*
 	public static void saveCanvas(Canvas canvas) {
 		canvas.getStoreModel().save();
 	}
-	
+*/
 	public static void checkSave(Canvas canvas, HistoryManager historyManager) {
 		canvas.getStoreModel().check(historyManager);
 	}

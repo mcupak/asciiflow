@@ -3,6 +3,7 @@ package com.lewish.asciiflow.client;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.lewish.asciiflow.shared.CellStateMap;
@@ -47,6 +48,7 @@ public class HistoryManager {
 
 	public void undo() {
 		if(currentState >= 0) {
+			Window.alert("Undo: "+currentState);
 			canvas.drawCellStates(undoStates.get(currentState));
 			canvas.refreshDraw();
 			undoStates.set(currentState--, canvas.commitDraw());
@@ -55,6 +57,7 @@ public class HistoryManager {
 
 	public void redo() {
 		if(undoStates.size() > currentState + 1) {
+			Window.alert("Redo: "+currentState);
 			canvas.drawCellStates(undoStates.get(++currentState));
 			canvas.refreshDraw();
 			undoStates.set(currentState, canvas.commitDraw());

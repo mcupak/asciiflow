@@ -57,7 +57,7 @@ public class StoreWidget extends Composite implements ModelChangeHandler {
 			@Override
 			public void onClick(ClickEvent event) {
 				SaveManager.checkSave(canvas, historyManager);
-				SaveManager.saveCanvas(canvas);
+				//SaveManager.saveCanvas(canvas);
 //				storeHelper.save();
 			}
 		});

@@ -6,6 +6,7 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.lewish.asciiflow.client.CompressedStoreServiceAsync.CheckCallback;
@@ -73,6 +74,7 @@ public class StoreModel {
 
 	private State currentState;
 	private Uri uri = null;
+	private int owner;
 
 	public Uri getUri() {
 		return uri;
@@ -89,8 +91,9 @@ public class StoreModel {
 		this.canvas = canvas;
 		this.loadingWidget = loadingWidget;
 
+		owner = Random.nextInt();
 		currentState = new State();
-		currentState.setOwner(Random.nextInt());
+		currentState.setOwner(owner);
 
 		// start periodic loading
 		/*
@@ -105,14 +108,19 @@ public class StoreModel {
 		*/
 	}
 
-	public void load(final Long id, final Integer editCode) {
+	public void load(final Long id, final Integer editCode, final boolean fromCheck, final HistoryManager historyManager) {
 		loadingWidget.show();
 		service.loadState(id, editCode, new LoadCallback() {
 			@Override
 			public void afterLoad(boolean success, State state) {
 				loadingWidget.hide();
 				currentState = state;
+				currentState.setOwner(owner);
 				fireEvent(ModelChangeEvent.LOADED);
+				if (fromCheck == true) {
+					historyManager.redo();//redo (for undo operation, undo)
+					save();
+				}
 			}
 		});
 	}
@@ -129,7 +137,7 @@ public class StoreModel {
 		// && editCode.equals(storeModel.getCurrentState().getEditCode())) {
 		// return;
 		// }
-		load(id, editCode);
+		load(id, editCode, false, null);
 	}
 	
 	public void check(final HistoryManager historyManager) {
@@ -138,11 +146,14 @@ public class StoreModel {
 		service.checkState(currentState, new CheckCallback() {
 			@Override
 			public void afterCheck(boolean success, State state) {
-				if (!success){
+				loadingWidget.hide();
+				if (success == false){
 					//need to pass history manager in here
 					historyManager.undo();//undo (for undo operation, redo)
-					load(uri.getId(), uri.getEditCode());
-					historyManager.redo();//redo (for undo operation, undo)
+					load(uri.getId(), uri.getEditCode(), true, historyManager);
+				}
+				else {
+					save();
 				}
 			}
 		});
