@@ -26,7 +26,7 @@ public abstract class Tool {
 	 */
 	protected void commitDraw() {
 		historyManager.save(canvas.commitDraw());
-		SaveManager.checkSave(canvas, historyManager);
+		SaveManager.checkSave(canvas, historyManager, false);
 		//SaveManager.saveCanvas(canvas);
 	}
 

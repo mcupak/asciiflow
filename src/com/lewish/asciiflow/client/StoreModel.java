@@ -108,7 +108,7 @@ public class StoreModel {
 		*/
 	}
 
-	public void load(final Long id, final Integer editCode, final boolean fromCheck, final HistoryManager historyManager) {
+	public void load(final Long id, final Integer editCode, final boolean fromCheck, final HistoryManager historyManager, final boolean isUndo) {
 		loadingWidget.show();
 		service.loadState(id, editCode, new LoadCallback() {
 			@Override
@@ -118,7 +118,12 @@ public class StoreModel {
 				currentState.setOwner(owner);
 				fireEvent(ModelChangeEvent.LOADED);
 				if (fromCheck == true) {
-					historyManager.redo();//redo (for undo operation, undo)
+					if (isUndo == true) {
+						historyManager.undo();
+					}
+					else {
+						historyManager.redo();//redo (for undo operation, undo)
+					}
 					save();
 				}
 			}
@@ -137,10 +142,10 @@ public class StoreModel {
 		// && editCode.equals(storeModel.getCurrentState().getEditCode())) {
 		// return;
 		// }
-		load(id, editCode, false, null);
+		load(id, editCode, false, null, false);
 	}
 	
-	public void check(final HistoryManager historyManager) {
+	public void check(final HistoryManager historyManager, final boolean isUndo) {
 		loadingWidget.show();
 		currentState.setCellStateMap(canvas.getCellStates());
 		service.checkState(currentState, new CheckCallback() {
@@ -149,8 +154,14 @@ public class StoreModel {
 				loadingWidget.hide();
 				if (success == false){
 					//need to pass history manager in here
-					historyManager.undo();//undo (for undo operation, redo)
-					load(uri.getId(), uri.getEditCode(), true, historyManager);
+					if (isUndo == true) {
+						historyManager.redo();
+						load(uri.getId(), uri.getEditCode(), true, historyManager, true);
+					}
+					else {
+						historyManager.undo();//undo (for undo operation, redo)
+						load(uri.getId(), uri.getEditCode(), true, historyManager, false);
+					}
 				}
 				else {
 					save();
