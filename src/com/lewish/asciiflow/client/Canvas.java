@@ -58,12 +58,12 @@ public class Canvas extends Composite {
 		initWidget(focusPanel);
 	}
 
-	private void setHeight(int height) {
+	public void setHeight(int height) {
 		panel.setHeight(height * CellImpl.HEIGHT + "px");
 		this.height = height;
 	}
 
-	private void setWidth(int width) {
+	public void setWidth(int width) {
 		panel.setWidth(width * CellImpl.WIDTH + "px");
 		this.width = width;
 	}

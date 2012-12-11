@@ -7,6 +7,7 @@ import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
 import com.google.appengine.api.datastore.Blob;
+import com.google.appengine.api.datastore.Text;
 
 /**
  * This is used as both the JDO object stored in the datastore and the DTO for
@@ -39,9 +40,14 @@ public class State implements Serializable {
 
 	@Persistent
 	private Integer owner = 0;
-	
+
 	@Persistent
-	private String operation;
+	private Integer canvasWidth = 0;
+	@Persistent
+	private Integer canvasHeight = 0;
+
+	@Persistent
+	private Text operation;
 
 	public Long getId() {
 		return id;
@@ -111,20 +117,116 @@ public class State implements Serializable {
 		return owner;
 	}
 
-	public String getOperation() {
+	public Text getOperation() {
 		return operation;
 	}
 
-	public void setOperation(String operation) {
+	public void setOperation(Text operation) {
 		this.operation = operation;
+	}
+
+	public Integer getCanvasWidth() {
+		return canvasWidth;
+	}
+
+	public void setCanvasWidth(Integer canvasWidth) {
+		this.canvasWidth = canvasWidth;
+	}
+
+	public Integer getCanvasHeight() {
+		return canvasHeight;
+	}
+
+	public void setCanvasHeight(Integer canvasHeight) {
+		this.canvasHeight = canvasHeight;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((canvasHeight == null) ? 0 : canvasHeight.hashCode());
+		result = prime * result
+				+ ((canvasWidth == null) ? 0 : canvasWidth.hashCode());
+		result = prime * result
+				+ ((compressedBlob == null) ? 0 : compressedBlob.hashCode());
+		result = prime * result
+				+ ((editCode == null) ? 0 : editCode.hashCode());
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result
+				+ ((isPublic == null) ? 0 : isPublic.hashCode());
+		result = prime * result
+				+ ((operation == null) ? 0 : operation.hashCode());
+		result = prime * result + ((owner == null) ? 0 : owner.hashCode());
+		result = prime * result + ((title == null) ? 0 : title.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		State other = (State) obj;
+		if (canvasHeight == null) {
+			if (other.canvasHeight != null)
+				return false;
+		} else if (!canvasHeight.equals(other.canvasHeight))
+			return false;
+		if (canvasWidth == null) {
+			if (other.canvasWidth != null)
+				return false;
+		} else if (!canvasWidth.equals(other.canvasWidth))
+			return false;
+		if (compressedBlob == null) {
+			if (other.compressedBlob != null)
+				return false;
+		} else if (!compressedBlob.equals(other.compressedBlob))
+			return false;
+		if (editCode == null) {
+			if (other.editCode != null)
+				return false;
+		} else if (!editCode.equals(other.editCode))
+			return false;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		if (isPublic == null) {
+			if (other.isPublic != null)
+				return false;
+		} else if (!isPublic.equals(other.isPublic))
+			return false;
+		if (operation == null) {
+			if (other.operation != null)
+				return false;
+		} else if (!operation.equals(other.operation))
+			return false;
+		if (owner == null) {
+			if (other.owner != null)
+				return false;
+		} else if (!owner.equals(other.owner))
+			return false;
+		if (title == null) {
+			if (other.title != null)
+				return false;
+		} else if (!title.equals(other.title))
+			return false;
+		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "State [cellStates=" + cellStates + ", id=" + id
-				+ ", compressedBlob=" + compressedBlob + ", title=" + title
-				+ ", editCode=" + editCode + ", isPublic=" + isPublic
-				+ ", owner=" + owner + ", operation=" + operation + "]";
+		return "State [id=" + id + ", compressedBlob=" + compressedBlob
+				+ ", title=" + title + ", editCode=" + editCode + ", isPublic="
+				+ isPublic + ", owner=" + owner + ", canvasWidth="
+				+ canvasWidth + ", canvasHeight=" + canvasHeight
+				+ ", operation=" + operation + "]";
 	}
 
 }

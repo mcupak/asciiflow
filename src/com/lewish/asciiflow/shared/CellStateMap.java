@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 
+import com.google.appengine.api.datastore.Text;
+
 public class CellStateMap implements Serializable {
 
 	private static final long serialVersionUID = -3792565912715855738L;
@@ -52,16 +54,16 @@ public class CellStateMap implements Serializable {
 		return true;
 	}
 
-	public static CellStateMap deserializeCellStateMap(String input) {
-		if (input == null || input.isEmpty())
+	public static CellStateMap deserializeCellStateMap(Text input) {
+		if (input == null || input.getValue().isEmpty())
 			return null;
 
-		String[] cells = input.split(";");
+		String[] cells = input.getValue().split(";");
 		CellStateMap cellStates = new CellStateMap();
 		for (String cell : cells) {
 			String[] properties = cell.split(":");
 			if (properties.length != 3)
-				throw new IllegalArgumentException(input);
+				throw new IllegalArgumentException(input.toString());
 			CellState cellState = new CellState(
 					Integer.parseInt(properties[0]),
 					Integer.parseInt(properties[1]), properties[2]);

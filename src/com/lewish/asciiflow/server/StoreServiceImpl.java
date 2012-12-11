@@ -18,6 +18,7 @@ import javax.jdo.Query;
 import org.datanucleus.store.appengine.query.JDOCursorHelper;
 
 import com.google.appengine.api.datastore.Cursor;
+import com.google.appengine.api.datastore.Text;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.lewish.asciiflow.client.StoreService;
 import com.lewish.asciiflow.shared.AccessException;
@@ -89,7 +90,7 @@ public class StoreServiceImpl extends RemoteServiceServlet implements
 						CellStateMap.deserializeCellStateMap(state
 								.getOperation()));
 				operations.add(entry);
-				
+
 				state = pm.makePersistent(state);
 				return state;
 			} finally {
@@ -127,8 +128,9 @@ public class StoreServiceImpl extends RemoteServiceServlet implements
 
 		// update operation in case of undo, return mask
 		if (!(operation == null || operation.isEmpty())) {
-			state.setOperation(findLatestCellStateMap(
-					CellStateMap.deserializeCellStateMap(operation)).toString());
+			state.setOperation(new Text(findLatestCellStateMap(
+					CellStateMap.deserializeCellStateMap(new Text(operation
+							.toString()))).toString()));
 		}
 
 		return state;

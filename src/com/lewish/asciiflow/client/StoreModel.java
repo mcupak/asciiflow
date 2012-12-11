@@ -1,5 +1,6 @@
 package com.lewish.asciiflow.client;
 
+import com.google.appengine.api.datastore.Text;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerManager;
@@ -119,6 +120,9 @@ public class StoreModel {
 						loadingWidget.hide();
 						currentState = state;
 						currentState.setOwner(owner);
+						canvas.setHeight(currentState.getCanvasHeight());
+						canvas.setWidth(currentState.getCanvasWidth());
+						
 						fireEvent(ModelChangeEvent.LOADED);
 						if (fromCheck == true) {
 							if (isUndo == true) {
@@ -178,9 +182,12 @@ public class StoreModel {
 
 	public void save(HistoryManager historyManager) {
 		loadingWidget.show();
+		
 		currentState.setCellStateMap(canvas.getCellStates());
-		// currentState.setOperation(historyManager.getCurrentState().toString());
-		currentState.setOperation(canvas.getLastDraw().toString());
+		currentState.setOperation(new Text(canvas.getLastDraw().toString()));
+		currentState.setCanvasHeight(canvas.getHeight());
+		currentState.setCanvasWidth(canvas.getWidth());
+		
 		service.saveState(currentState, new SaveCallback() {
 			@Override
 			public void afterSave(boolean success, State state) {
