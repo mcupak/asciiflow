@@ -7,6 +7,8 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.lewish.asciiflow.client.CompressedStoreServiceAsync.CheckCallback;
@@ -118,10 +120,11 @@ public class StoreModel {
 					@Override
 					public void afterLoad(boolean success, State state) {
 						loadingWidget.hide();
-						currentState = state;
-						currentState.setOwner(owner);
+						// also propagate canvas size
 						canvas.setHeight(currentState.getCanvasHeight());
 						canvas.setWidth(currentState.getCanvasWidth());
+						currentState = state;
+						currentState.setOwner(owner);
 						
 						fireEvent(ModelChangeEvent.LOADED);
 						if (fromCheck == true) {
@@ -183,10 +186,10 @@ public class StoreModel {
 	public void save(HistoryManager historyManager) {
 		loadingWidget.show();
 		
-		currentState.setCellStateMap(canvas.getCellStates());
-		currentState.setOperation(new Text(canvas.getLastDraw().toString()));
 		currentState.setCanvasHeight(canvas.getHeight());
 		currentState.setCanvasWidth(canvas.getWidth());
+		currentState.setCellStateMap(canvas.getCellStates());
+		currentState.setOperation(new Text(canvas.getLastDraw().toString()));
 		
 		service.saveState(currentState, new SaveCallback() {
 			@Override
