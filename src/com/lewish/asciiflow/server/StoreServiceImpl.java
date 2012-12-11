@@ -25,7 +25,9 @@ import com.lewish.asciiflow.shared.AccessException;
 import com.lewish.asciiflow.shared.BatchStoreQueryResult;
 import com.lewish.asciiflow.shared.CellState;
 import com.lewish.asciiflow.shared.CellStateMap;
+import com.lewish.asciiflow.shared.Compressor;
 import com.lewish.asciiflow.shared.State;
+import com.lewish.asciiflow.shared.Compressor.Callback;
 
 /**
  * Provides server side bridge between client and datastore for simple object
@@ -38,6 +40,9 @@ public class StoreServiceImpl extends RemoteServiceServlet implements
 		StoreService {
 
 	private static final long serialVersionUID = -3286308257185371845L;
+
+	// needed for state construction from log
+	private final Compressor compressor = new ServerCompressor();
 
 	private Random random = new Random();
 	private final static PersistenceManagerFactory managerFactory = JDOHelper
@@ -82,20 +87,41 @@ public class StoreServiceImpl extends RemoteServiceServlet implements
 				throw new AccessException(state);
 			}
 		}
-		PersistenceManager pm = managerFactory.getPersistenceManager();
+		
+		// construction of the state from the log of operations
+		// TODO: far from ideal, but does the trick - should be changed
+		final PersistenceManager pm = managerFactory.getPersistenceManager();
 		if (state.isCompressed()) {
-			try {
-				AbstractMap.SimpleEntry<String, CellStateMap> entry = new AbstractMap.SimpleEntry<String, CellStateMap>(
-						this.getThreadLocalRequest().getSession().getId(),
-						CellStateMap.deserializeCellStateMap(state
-								.getOperation()));
-				operations.add(entry);
+			final State uncompressed = state;
+			final String clientId = this.getThreadLocalRequest().getSession()
+					.getId();
+			compressor.uncompress(state, new Callback() {
 
-				state = pm.makePersistent(state);
-				return state;
-			} finally {
-				pm.close();
-			}
+				@Override
+				public void onFinish(boolean success) {
+					AbstractMap.SimpleEntry<String, CellStateMap> entry = new AbstractMap.SimpleEntry<String, CellStateMap>(
+							clientId, CellStateMap
+									.deserializeCellStateMap(uncompressed
+											.getOperation()));
+					operations.add(entry);
+					for (CellState s:entry.getValue().getCellStates()) {
+						uncompressed.getCellStateMap().update(s);
+					}
+
+					compressor.compress(uncompressed, new Callback() {
+
+						@Override
+						public void onFinish(boolean success) {
+							try {
+								pm.makePersistent(uncompressed);
+							} finally {
+								pm.close();
+							}
+						}
+					});
+				}
+			});
+			return uncompressed;
 		} else {
 			return null;
 		}

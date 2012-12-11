@@ -15,6 +15,11 @@ public class CellStateMap implements Serializable {
 		String key = cellState.x + ":" + cellState.y;
 		maps.put(key, cellState);
 	}
+	
+	public void update(CellState cellState) {
+		remove(cellState);
+		add(cellState);
+	}
 
 	public void remove(CellState cellState) {
 		String key = cellState.x + ":" + cellState.y;
