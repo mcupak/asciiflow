@@ -96,12 +96,15 @@ public class StoreModel {
 		currentState.setOwner(owner);
 
 		// start periodic loading
-		/*
-		 * loadTimer = new Timer() {
-		 * 
-		 * @Override public void run() { loadFromUri(); } };
-		 * loadTimer.scheduleRepeating(LOADING_INTERVAL);
-		 */
+		loadTimer = new Timer() {
+
+			@Override
+			public void run() {
+				loadFromUri();
+			}
+		};
+		loadTimer.scheduleRepeating(LOADING_INTERVAL);
+
 	}
 
 	public void load(final Long id, final Integer editCode,
