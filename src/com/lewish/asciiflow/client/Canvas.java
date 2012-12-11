@@ -42,6 +42,7 @@ public class Canvas extends Composite {
 	private CellFactory cellFactory;
 
 	private Set<CellImpl> currentDraw = new HashSet<CellImpl>();
+	private CellStateMap lastDraw;
 	private Set<CellImpl> nextDraw = new HashSet<CellImpl>();
 
 	private StoreModel storeModel;
@@ -156,6 +157,8 @@ public class Canvas extends Composite {
 	}
 
 	public CellStateMap commitDraw() {
+		// remember the operation
+		lastDraw = new CellStateMap();
 		// This is effectively a diff, the state that should be drawn to undo.
 		CellStateMap oldState = new CellStateMap();
 		for (CellImpl cell : currentDraw) {
@@ -173,11 +176,12 @@ public class Canvas extends Composite {
 				cell.drawHighlight = false;
 				pushHighlight(cell);
 			}
+			lastDraw.add(cell.convertToState());
 		}
 		currentDraw.clear();
 		return oldState;
 	}
-	
+
 	private void pushHighlight(CellImpl cell) {
 		cell.highlight = cell.drawHighlight;
 		if (cell.highlight) {
@@ -304,6 +308,23 @@ public class Canvas extends Composite {
 		public int getY() {
 			return y;
 		}
+
+		public CellState convertToState() {
+			return new CellState(x, y, commitValue);
+		}
+
+		@Override
+		public String toString() {
+			return "CellImpl [x=" + x + ", y=" + y + ", value=" + value
+					+ ", commitValue=" + commitValue + ", drawValue="
+					+ drawValue + ", highlight=" + highlight
+					+ ", drawHighlight=" + drawHighlight + "]";
+		}
+
+	}
+
+	public CellStateMap getLastDraw() {
+		return lastDraw;
 	}
 
 }

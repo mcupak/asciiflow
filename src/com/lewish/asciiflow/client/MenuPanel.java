@@ -60,7 +60,7 @@ public class MenuPanel extends Composite {
 			@Override
 			public void onClick(ClickEvent event) {
 				historyManager.redo();
-				canvas.getStoreModel().save();
+				canvas.getStoreModel().save(historyManager);
 				SaveManager.checkSave(canvas, historyManager, false);
 				//SaveManager.saveCanvas(canvas);
 			}

@@ -6,12 +6,12 @@ import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.lewish.asciiflow.client.CompressedStoreServiceAsync.CheckCallback;
 import com.lewish.asciiflow.client.CompressedStoreServiceAsync.LoadCallback;
 import com.lewish.asciiflow.client.CompressedStoreServiceAsync.SaveCallback;
+import com.lewish.asciiflow.shared.CellStateMap;
 import com.lewish.asciiflow.shared.State;
 
 /**
@@ -24,7 +24,7 @@ import com.lewish.asciiflow.shared.State;
 @Singleton
 public class StoreModel {
 
-	private static final int LOADING_INTERVAL = 3000;
+	private static final int LOADING_INTERVAL = 60000;
 	Timer loadTimer;
 
 	public static interface ModelChangeHandler extends EventHandler {
@@ -97,37 +97,40 @@ public class StoreModel {
 
 		// start periodic loading
 		/*
-		loadTimer = new Timer() {
-
-			@Override
-			public void run() {
-				loadFromUri();
-			}
-		};
-		loadTimer.scheduleRepeating(LOADING_INTERVAL);
-		*/
+		 * loadTimer = new Timer() {
+		 * 
+		 * @Override public void run() { loadFromUri(); } };
+		 * loadTimer.scheduleRepeating(LOADING_INTERVAL);
+		 */
 	}
 
-	public void load(final Long id, final Integer editCode, final boolean fromCheck, final HistoryManager historyManager, final boolean isUndo) {
+	public void load(final Long id, final Integer editCode,
+			final boolean fromCheck, final HistoryManager historyManager,
+			final boolean isUndo) {
 		loadingWidget.show();
-		service.loadState(id, editCode, new LoadCallback() {
-			@Override
-			public void afterLoad(boolean success, State state) {
-				loadingWidget.hide();
-				currentState = state;
-				currentState.setOwner(owner);
-				fireEvent(ModelChangeEvent.LOADED);
-				if (fromCheck == true) {
-					if (isUndo == true) {
-						historyManager.undo();
+		service.loadState(id, editCode,
+				(isUndo) ? (historyManager.getCurrentState().toString())
+						: (null), new LoadCallback() {
+					@Override
+					public void afterLoad(boolean success, State state) {
+						loadingWidget.hide();
+						currentState = state;
+						currentState.setOwner(owner);
+						fireEvent(ModelChangeEvent.LOADED);
+						if (fromCheck == true) {
+							if (isUndo == true) {
+								historyManager.setMask(CellStateMap
+										.deserializeCellStateMap(state
+												.getOperation()));
+								historyManager.undo();
+							} else {
+								historyManager.redo();// redo (for undo
+														// operation, undo)
+							}
+							save(historyManager);
+						}
 					}
-					else {
-						historyManager.redo();//redo (for undo operation, undo)
-					}
-					save();
-				}
-			}
-		});
+				});
 	}
 
 	public void loadFromUri() {
@@ -144,7 +147,7 @@ public class StoreModel {
 		// }
 		load(id, editCode, false, null, false);
 	}
-	
+
 	public void check(final HistoryManager historyManager, final boolean isUndo) {
 		loadingWidget.show();
 		currentState.setCellStateMap(canvas.getCellStates());
@@ -152,27 +155,29 @@ public class StoreModel {
 			@Override
 			public void afterCheck(boolean success, State state) {
 				loadingWidget.hide();
-				if (success == false){
-					//need to pass history manager in here
+				if (success == false) {
+					// need to pass history manager in here
 					if (isUndo == true) {
 						historyManager.redo();
-						load(uri.getId(), uri.getEditCode(), true, historyManager, true);
+						load(uri.getId(), uri.getEditCode(), true,
+								historyManager, true);
+					} else {
+						historyManager.undo();// undo (for undo operation, redo)
+						load(uri.getId(), uri.getEditCode(), true,
+								historyManager, false);
 					}
-					else {
-						historyManager.undo();//undo (for undo operation, redo)
-						load(uri.getId(), uri.getEditCode(), true, historyManager, false);
-					}
-				}
-				else {
-					save();
+				} else {
+					save(historyManager);
 				}
 			}
 		});
 	}
 
-	public void save() {
+	public void save(HistoryManager historyManager) {
 		loadingWidget.show();
 		currentState.setCellStateMap(canvas.getCellStates());
+		// currentState.setOperation(historyManager.getCurrentState().toString());
+		currentState.setOperation(canvas.getLastDraw().toString());
 		service.saveState(currentState, new SaveCallback() {
 			@Override
 			public void afterSave(boolean success, State state) {

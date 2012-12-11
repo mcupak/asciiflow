@@ -27,8 +27,8 @@ public class CompressedStoreServiceAsync {
 		this.compressor = compressor;
 	}
 
-	public void loadState(Long id, Integer editCode, final LoadCallback callback) {
-		service.loadState(id, editCode, new AsyncCallback<State>() {
+	public void loadState(Long id, Integer editCode, String operation, final LoadCallback callback) {
+		service.loadState(id, editCode, operation, new AsyncCallback<State>() {
 			@Override
 			public void onSuccess(final State result) {
 //				Window.alert("Successful Load");
@@ -75,7 +75,7 @@ public class CompressedStoreServiceAsync {
 			}
 			@Override
 			public void onSuccess(Integer result) {
-				Window.alert("The number is "+result);
+//				Window.alert("The number is "+result);
 				if (result.equals(0)) {
 					callback.afterCheck(true, state);
 				}

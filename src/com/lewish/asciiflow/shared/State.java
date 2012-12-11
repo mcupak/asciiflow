@@ -6,12 +6,11 @@ import javax.jdo.annotations.IdGeneratorStrategy;
 import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
-
 import com.google.appengine.api.datastore.Blob;
 
 /**
- * This is used as both the JDO object stored in the datastore and the DTO for GWT RPCs.
- * Represents a diagram.
+ * This is used as both the JDO object stored in the datastore and the DTO for
+ * GWT RPCs. Represents a diagram.
  * 
  * @author lewis
  */
@@ -37,9 +36,12 @@ public class State implements Serializable {
 
 	@Persistent
 	private Boolean isPublic = false;
-	
+
 	@Persistent
 	private Integer owner = 0;
+	
+	@Persistent
+	private String operation;
 
 	public Long getId() {
 		return id;
@@ -108,4 +110,21 @@ public class State implements Serializable {
 	public Integer getOwner() {
 		return owner;
 	}
+
+	public String getOperation() {
+		return operation;
+	}
+
+	public void setOperation(String operation) {
+		this.operation = operation;
+	}
+
+	@Override
+	public String toString() {
+		return "State [cellStates=" + cellStates + ", id=" + id
+				+ ", compressedBlob=" + compressedBlob + ", title=" + title
+				+ ", editCode=" + editCode + ", isPublic=" + isPublic
+				+ ", owner=" + owner + ", operation=" + operation + "]";
+	}
+
 }

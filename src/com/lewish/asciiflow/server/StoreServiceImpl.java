@@ -1,9 +1,13 @@
 package com.lewish.asciiflow.server;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 
 import javax.jdo.JDOHelper;
@@ -18,38 +22,74 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.lewish.asciiflow.client.StoreService;
 import com.lewish.asciiflow.shared.AccessException;
 import com.lewish.asciiflow.shared.BatchStoreQueryResult;
+import com.lewish.asciiflow.shared.CellState;
+import com.lewish.asciiflow.shared.CellStateMap;
 import com.lewish.asciiflow.shared.State;
 
 /**
- * Provides server side bridge between client and datastore for simple object retrieval.
- * Also provides the basic authentication mechanism for accessing drawings.
+ * Provides server side bridge between client and datastore for simple object
+ * retrieval. Also provides the basic authentication mechanism for accessing
+ * drawings.
  * 
  * @author lewis
  */
-public class StoreServiceImpl extends RemoteServiceServlet implements StoreService {
+public class StoreServiceImpl extends RemoteServiceServlet implements
+		StoreService {
 
 	private static final long serialVersionUID = -3286308257185371845L;
 
 	private Random random = new Random();
 	private final static PersistenceManagerFactory managerFactory = JDOHelper
-	.getPersistenceManagerFactory("transactions-optional");
+			.getPersistenceManagerFactory("transactions-optional");
+	private static final List<Entry<String, CellStateMap>> operations = new LinkedList<Entry<String, CellStateMap>>();
+
+	private CellStateMap findLatestCellStateMap(final CellStateMap c) {
+		String client = this.getThreadLocalRequest().getSession().getId();
+
+		CellStateMap mask = new CellStateMap();
+		ListIterator<Entry<String, CellStateMap>> li = operations
+				.listIterator(operations.size());
+		// Iterate in reverse.
+		while (li.hasPrevious()) {
+			Entry<String, CellStateMap> entry = li.previous();
+			for (CellState s : entry.getValue().getCellStates()) {
+				// map, don't update with the latest value, equals when the
+				// coordinates equal
+				if ((!mask.getCellStates().contains(s))
+						&& c.getCellStates().contains(s)) {
+					mask.add((client.equals(entry.getKey())) ? (new CellState(
+							s.x, s.y, null)) : s);
+				}
+				if (mask.getCellStates().size() >= c.getCellStates().size())
+					return mask;
+			}
+		}
+
+		return mask;
+	}
 
 	@Override
 	public State saveState(State state) throws AccessException {
 
-		if(!state.hasId()) {
-			//TODO Check collisions or do some math.
+		if (!state.hasId()) {
+			// TODO Check collisions or do some math.
 			state.setId(generateId());
 			state.setEditCode(generateEditCode());
 		} else {
 			State loadState = fetchState(state.getId());
-			if(!loadState.getEditCode().equals(state.getEditCode())) {
+			if (!loadState.getEditCode().equals(state.getEditCode())) {
 				throw new AccessException(state);
 			}
 		}
 		PersistenceManager pm = managerFactory.getPersistenceManager();
 		if (state.isCompressed()) {
 			try {
+				AbstractMap.SimpleEntry<String, CellStateMap> entry = new AbstractMap.SimpleEntry<String, CellStateMap>(
+						this.getThreadLocalRequest().getSession().getId(),
+						CellStateMap.deserializeCellStateMap(state
+								.getOperation()));
+				operations.add(entry);
+				
 				state = pm.makePersistent(state);
 				return state;
 			} finally {
@@ -62,7 +102,7 @@ public class StoreServiceImpl extends RemoteServiceServlet implements StoreServi
 
 	private Long generateId() {
 		Long id = 0l;
-		while(id <= 0) {
+		while (id <= 0) {
 			id = random.nextLong();
 		}
 		return id;
@@ -70,19 +110,27 @@ public class StoreServiceImpl extends RemoteServiceServlet implements StoreServi
 
 	private Integer generateEditCode() {
 		Integer code = 0;
-		while(code <= 0) {
+		while (code <= 0) {
 			code = random.nextInt();
 		}
 		return code;
 	}
 
 	@Override
-	public State loadState(Long id, Integer editCode) {
+	public State loadState(Long id, Integer editCode, String operation) {
 		State state = fetchState(id);
-		//Do not return the edit code unless it is valid.
+
+		// Do not return the edit code unless it is valid.
 		if (!editCode.equals(state.getEditCode())) {
 			state.setEditCode(0);
 		}
+
+		// update operation in case of undo, return mask
+		if (!(operation == null || operation.isEmpty())) {
+			state.setOperation(findLatestCellStateMap(
+					CellStateMap.deserializeCellStateMap(operation)).toString());
+		}
+
 		return state;
 	}
 
@@ -112,7 +160,8 @@ public class StoreServiceImpl extends RemoteServiceServlet implements StoreServi
 		} finally {
 			pm.close();
 		}
-		return new BatchStoreQueryResult(new ArrayList<State>(cleanStates), newCursorString);
+		return new BatchStoreQueryResult(new ArrayList<State>(cleanStates),
+				newCursorString);
 	}
 
 	private State fetchState(Long id) {
@@ -131,19 +180,18 @@ public class StoreServiceImpl extends RemoteServiceServlet implements StoreServi
 	@Override
 	public Integer checkState(State state) throws AccessException {
 		Integer a = 0;
-		if(!state.hasId()) {
-			//TODO Check collisions or do some math.
+		if (!state.hasId()) {
+			// TODO Check collisions or do some math.
 			state.setId(generateId());
 			state.setEditCode(generateEditCode());
 		} else {
 			State loadState = fetchState(state.getId());
-			if(!loadState.getEditCode().equals(state.getEditCode())) {
+			if (!loadState.getEditCode().equals(state.getEditCode())) {
 				throw new AccessException(state);
 			}
 			if (state.getOwner().equals(loadState.getOwner())) {
 				return a;
-			}
-			else {
+			} else {
 				Integer b = 1;
 				return b;
 			}

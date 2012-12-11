@@ -9,7 +9,7 @@ import com.lewish.asciiflow.shared.State;
 @RemoteServiceRelativePath("../store")
 public interface StoreService extends RemoteService {
 	public State saveState(State state) throws AccessException;
-	public State loadState(Long id, Integer editCode);
+	State loadState(Long id, Integer editCode, String operation);
 	public BatchStoreQueryResult loadTenStates(String cursorString);
 	public Integer checkState(State state) throws AccessException;
 }
