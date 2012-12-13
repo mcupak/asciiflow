@@ -49,6 +49,22 @@ public class StoreServiceImpl extends RemoteServiceServlet implements
 			.getPersistenceManagerFactory("transactions-optional");
 	private static final List<Entry<String, CellStateMap>> operations = new LinkedList<Entry<String, CellStateMap>>();
 
+	private class Lock {
+		private int lock = 0;
+
+		public void lock() {
+			lock = 1;
+		}
+
+		public void unlock() {
+			lock = 0;
+		}
+
+		public boolean isLocked() {
+			return (lock >= 1);
+		}
+	}
+
 	private CellStateMap findLatestCellStateMap(final CellStateMap c) {
 		String client = this.getThreadLocalRequest().getSession().getId();
 
@@ -87,7 +103,7 @@ public class StoreServiceImpl extends RemoteServiceServlet implements
 				throw new AccessException(state);
 			}
 		}
-		
+
 		// construction of the state from the log of operations
 		// TODO: far from ideal, but does the trick - should be changed
 		final PersistenceManager pm = managerFactory.getPersistenceManager();
@@ -95,6 +111,9 @@ public class StoreServiceImpl extends RemoteServiceServlet implements
 			final State uncompressed = state;
 			final String clientId = this.getThreadLocalRequest().getSession()
 					.getId();
+			
+			final Lock lock = new Lock();
+			lock.lock();
 			compressor.uncompress(state, new Callback() {
 
 				@Override
@@ -104,7 +123,7 @@ public class StoreServiceImpl extends RemoteServiceServlet implements
 									.deserializeCellStateMap(uncompressed
 											.getOperation()));
 					operations.add(entry);
-					for (CellState s:entry.getValue().getCellStates()) {
+					for (CellState s : entry.getValue().getCellStates()) {
 						uncompressed.getCellStateMap().update(s);
 					}
 
@@ -114,6 +133,7 @@ public class StoreServiceImpl extends RemoteServiceServlet implements
 						public void onFinish(boolean success) {
 							try {
 								pm.makePersistent(uncompressed);
+								lock.unlock();
 							} finally {
 								pm.close();
 							}
@@ -121,6 +141,8 @@ public class StoreServiceImpl extends RemoteServiceServlet implements
 					});
 				}
 			});
+			while (lock.isLocked())
+				;
 			return uncompressed;
 		} else {
 			return null;
